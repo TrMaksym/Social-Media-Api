@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, filters, status
+from rest_framework import generics, filters, status, viewsets
 from rest_framework.generics import CreateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -98,3 +98,10 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("username", "email", "first_name", "last_name")

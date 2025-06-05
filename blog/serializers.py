@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from blog.models import Category, Post, Comment, Profile
+from blog.models import Category, Post, Comment, Profile, Tag
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -15,8 +15,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "email")
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ("id", "name", "slug")
 
 class PostSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
     categories = CategorySerializer(many=True, read_only=True)
     like_count = serializers.SerializerMethodField()
@@ -35,6 +40,7 @@ class PostSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "like_count",
+            "tags"
         )
 
     def get_like_count(self, obj):

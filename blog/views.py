@@ -1,7 +1,12 @@
-from rest_framework import filters
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from blog.models import Category, Post, Comment, Profile
 from blog.serializers import CategorySerializer, PostSerializer, CommentSerializer, ProfileSerializer
@@ -18,7 +23,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["categories__slug"]
+    filterset_fields = ["categories__slug", "tags__slug"]
     search_fields = ["title", "content"]
 
     def perform_create(self, serializer):
@@ -30,6 +35,24 @@ class PostViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return queryset.filter(is_published=True) | queryset.filter(author=user)
         return queryset.filter(is_published=True)
+
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        if user in post.likes.all():
+            return Response({"detail": "Already liked."}, status=status.HTTP_400_BAD_REQUEST)
+        post.likes.add(user)
+        return Response({"detail": "Post liked."})
+
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        if user not in post.likes.all():
+            return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+        post.likes.remove(user)
+        return Response({"detail": "Post unliked."})
 
 
 
@@ -56,5 +79,3 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
-
-

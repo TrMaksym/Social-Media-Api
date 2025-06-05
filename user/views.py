@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
 from rest_framework.generics import CreateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models import User
 from user.serializers import UserSerializer
@@ -75,3 +76,25 @@ class FollowersView(generics.ListAPIView):
 
     def get_queryset(self):
         return self.request.user.followers.all()
+
+class ProfileView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

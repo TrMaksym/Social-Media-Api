@@ -35,6 +35,22 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            num = 1
+            while Post.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{num}"
+                num += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def lite_count(self):
+        return self.likes.count()
+
+    def approved_comments(self):
+        return self.comments.filter(is_approved=True)
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
@@ -67,9 +83,19 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def auto_delete_profile_image_on_delete(sender, instance, **kwargs):
+    if instance.profile_image:
+        instance.profile_image.delete(save=False)
+
 class PostMedia(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
     file = models.FileField(upload_to="post_media/")
 
     def __str__(self):
         return f"{self.post}'s media file"
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)

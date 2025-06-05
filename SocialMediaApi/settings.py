@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "blog",
     "user"
@@ -140,6 +141,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": ("blog.permissions.IsAdminOrIfAuthenticated",),
     "DEFAULT_THROTTLING_CLASSES": {
         "anonymous": "100/day",
@@ -164,4 +166,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
     "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_BLACKLIST_ENABLED": True,
 }

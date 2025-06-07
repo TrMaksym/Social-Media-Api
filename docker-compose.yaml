@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: "celery -A SocialMediaApi worker -l info"
+    command: "celery -A Social_Media_Api worker -l info"
     depends_on:
       - web
       - redis
@@ -47,7 +47,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: "celery -A SocialMediaApi beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    command: "celery -A Social_Media_Api beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     depends_on:
       - web
       - redis
@@ -62,7 +62,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5555:5555"
-    command: "celery -A SocialMediaApi flower --address=0.0.0.0"
+    command: "celery -A Social_Media_Api flower --address=0.0.0.0"
     depends_on:
       - celery
     env_file:

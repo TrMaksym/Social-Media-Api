@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from rest_framework.exceptions import ValidationError
 
 
 class Category(models.Model):
@@ -82,6 +83,14 @@ class Follow(models.Model):
 
     class Meta:
         unique_together = ("follower", "following")
+
+    def clean(self):
+        if self.following == self.follower:
+            raise ValidationError("You can't follow yourself")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.follower} follows {self.following}"

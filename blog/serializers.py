@@ -91,6 +91,20 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ["id", "follower", "following", "created_at"]
 
+    def validate(self, data):
+        follower = self.context["request"].user
+        following = data.get("following")
+
+        if follower == following:
+            raise serializers.ValidationError("You can't follow yourself")
+
+        if Follow.objects.filter(follower=follower, following=following).exists():
+            raise serializers.ValidationError("You following this user")
+
+    def create(self, validated_data):
+        validated_data["follower"] = self.context["request"].user
+        return super().create(validated_data)
+
 
 class PostMediaSerializer(serializers.ModelSerializer):
     class Meta:

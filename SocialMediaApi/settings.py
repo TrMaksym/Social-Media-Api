@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_filters",
+    "django_celery_beat",
     "blog",
     "user",
 ]
@@ -90,8 +91,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("NAME_DB"),
+        "USER": os.getenv("USER_DB"),
+        "PASSWORD": os.getenv("PASSWORD_DB"),
+        "HOST": os.getenv("HOST_DB"),
+        "PORT": os.getenv("PORT_DB"),
     }
 }
 
@@ -168,3 +173,9 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_BLACKLIST_ENABLED": True,
 }
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

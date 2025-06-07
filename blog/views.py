@@ -14,7 +14,8 @@ from blog.serializers import (
     PostSerializer,
     CommentSerializer,
     ProfileSerializer,
-    FollowSerializer, PostMediaSerializer,
+    FollowSerializer,
+    PostMediaSerializer,
 )
 
 
@@ -111,6 +112,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all().select_related("user")
     serializer_class = ProfileSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["user__username", "bio"]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -142,6 +145,7 @@ class FollowViewSet(viewsets.ModelViewSet):
         following = Follow.objects.filter(follower=user)
         serializer = self.get_serializer(following, many=True)
         return Response(serializer.data)
+
 
 class PostMediaViewSet(viewsets.ModelViewSet):
     serializer_class = PostMediaSerializer

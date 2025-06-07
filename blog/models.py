@@ -3,7 +3,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
 from rest_framework.exceptions import ValidationError
@@ -65,7 +65,7 @@ class Post(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
-    def lite_count(self):
+    def like_count(self):
         return self.likes.count()
 
     def approved_comments(self):
@@ -74,10 +74,14 @@ class Post(models.Model):
 
 class Follow(models.Model):
     follower = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="following", on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        related_name="following_relations",
+        on_delete=models.CASCADE,
     )
     following = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="followers", on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        related_name="follower_relations",
+        on_delete=models.CASCADE,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -130,7 +134,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+@receiver(pre_delete, sender=Profile)
 def auto_delete_profile_image_on_delete(sender, instance, **kwargs):
     if instance.profile_image:
         instance.profile_image.delete(save=False)

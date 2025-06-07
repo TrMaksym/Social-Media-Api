@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from blog.models import Category, Post, Comment, Profile, Tag
+from blog.models import Category, Post, Comment, Profile, Tag, Follow, PostMedia
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,10 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "email")
 
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ("id", "name", "slug")
+
 
 class PostSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
@@ -40,7 +43,7 @@ class PostSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "like_count",
-            "tags"
+            "tags",
         )
 
     def get_like_count(self, obj):
@@ -48,12 +51,16 @@ class PostSerializer(serializers.ModelSerializer):
 
     def validate_title(self, value):
         if len(value) < 5:
-            raise serializers.ValidationError("Title must be at least 5 characters long.")
+            raise serializers.ValidationError(
+                "Title must be at least 5 characters long."
+            )
         return value
 
     def validate_content(self, value):
         if len(value) < 20:
-            raise serializers.ValidationError("Content must be at least 20 characters long.")
+            raise serializers.ValidationError(
+                "Content must be at least 20 characters long."
+            )
         return value
 
 
@@ -72,3 +79,21 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("id", "user", "bio", "profile_image")
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    follower = serializers.StringRelatedField(read_only=True)
+    following = serializers.SlugRelatedField(
+        slug_field="username", queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Follow
+        fields = ["id", "follower", "following", "created_at"]
+
+
+class PostMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostMedia
+        fields = ["id", "post", "file"]
+        read_only_fields = ["post"]

@@ -77,6 +77,7 @@ class FollowersView(generics.ListAPIView):
     def get_queryset(self):
         return self.request.user.followers.all()
 
+
 class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer

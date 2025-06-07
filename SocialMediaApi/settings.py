@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -25,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,7 +50,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     "blog",
-    "user"
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -68,8 +69,7 @@ ROOT_URLCONF = "SocialMediaApi.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -144,10 +144,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": ("blog.permissions.IsAdminOrIfAuthenticated",),
-    "DEFAULT_THROTTLING_CLASSES": {
-        "anonymous": "100/day",
-        "user": "1000/day"
-    }
+    "DEFAULT_THROTTLING_CLASSES": {"anonymous": "100/day", "user": "1000/day"},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -160,7 +157,7 @@ SPECTACULAR_SETTINGS = {
         "defaultModelRendering": "model",
         "defaultModelsExpandDepth": 2,
         "defaultModelExpandDepth": 2,
-    }
+    },
 }
 
 SIMPLE_JWT = {
